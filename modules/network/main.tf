@@ -15,13 +15,13 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_firewall" "default" {
-  name    = "allow-http"
+  name    = "allow-http-ssh"
   network = google_compute_network.vpc_network.name
 
   allow {
     protocol = "tcp"
-    ports    = ["80"]
+    ports    = ["80","22"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = ["109.111.235.230/32"]
 }
