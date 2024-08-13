@@ -22,6 +22,10 @@ resource "google_compute_instance" "vm_instance" {
     sudo systemctl start apache2
     echo '<h1>Welcome to the Apache server</h1>' | sudo tee /var/www/html/index.html
   EOF
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "null_resource" "stop_instance" {
@@ -30,7 +34,7 @@ resource "null_resource" "stop_instance" {
   }
 
   triggers = {
-    always_run = "${timestamp()}"
+    always_run = timestamp()
   }
 
   depends_on = [google_compute_instance.vm_instance]
@@ -48,8 +52,45 @@ resource "null_resource" "start_instance" {
   }
 
   triggers = {
-    always_run = "${timestamp()}"
+    always_run = timestamp()
   }
 
   depends_on = [google_compute_image.vm_image]
+}
+
+resource "google_compute_instance_template" "vm_template" {
+  name         = "${var.instance_name}-template"
+  machine_type = var.machine_type
+
+  disk {
+    source_image = google_compute_image.vm_image.self_link
+  }
+
+  network_interface {
+    network    = var.network
+    subnetwork = var.subnet
+    access_config {}
+  }
+
+  metadata_startup_script = <<-EOF
+    #!/bin/bash
+    sudo apt-get update
+    sudo apt-get install -y apache2
+    echo '<h1>Welcome to $(hostname)</h1>' | sudo tee /var/www/html/index.html
+    sudo systemctl start apache2
+  EOF
+}
+
+resource "google_compute_instance_group_manager" "vm_igm" {
+  name               = "${var.instance_name}-igm"
+  zone               = var.zone
+  base_instance_name = var.instance_name
+  target_size        = 3
+  version {
+    instance_template = google_compute_instance_template.vm_template.self_link
+  }
+}
+
+output "instance_group" {
+  value = google_compute_instance_group_manager.vm_igm.instance_group
 }

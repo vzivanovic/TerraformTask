@@ -22,3 +22,14 @@ module "compute" {
   network       = module.network.network
   subnet        = module.network.subnet
 }
+
+module "loadbalancer" {
+  source              = "./modules/loadbalancer"
+  health_check_name   = "http-health-check"
+  backend_service_name = "backend-service"
+  url_map_name        = "url-map"
+  http_proxy_name     = "http-lb-proxy"
+  forwarding_rule_name = "http-lb-rule"
+  global_address_name = "lb-ip"
+  instance_group      = module.compute.instance_group
+}
