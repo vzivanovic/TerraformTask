@@ -5,3 +5,4 @@ variable "instance_name" {}
 variable "machine_type" {}
 variable "network" {}
 variable "subnet" {}
+variable "boot_image" {}

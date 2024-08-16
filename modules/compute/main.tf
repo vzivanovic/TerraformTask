@@ -1,3 +1,6 @@
+locals {
+  boot_image = var.boot_image != null ? var.boot_image : "debian-cloud/debian-11"
+}
 resource "google_compute_instance" "vm_instance" {
   name         = var.instance_name
   machine_type = var.machine_type
@@ -5,7 +8,7 @@ resource "google_compute_instance" "vm_instance" {
 
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = local.boot_image
     }
   }
 
@@ -15,13 +18,7 @@ resource "google_compute_instance" "vm_instance" {
     access_config {}
   }
 
-  metadata_startup_script = <<-EOF
-    #!/bin/bash
-    sudo apt-get update
-    sudo apt-get install -y apache2
-    sudo systemctl start apache2
-    echo '<h1>Welcome to the Apache server</h1>' | sudo tee /var/www/html/index.html
-  EOF
+  metadata_startup_script = file("${path.module}/startup-script.sh")
 
   lifecycle {
     create_before_destroy = true

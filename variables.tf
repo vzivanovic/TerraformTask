@@ -29,3 +29,17 @@ variable "instance_name" {
 variable "machine_type" {
   default = "f1-micro"
 }
+variable "boot_image" {
+  description = "The boot image to use for the instance. Defaults to debian-cloud/debian-11 if not set."
+  type        = string
+  default     = null
+}
+variable "firewall_rules" {
+  description = "A map of firewall rules to create"
+  type = map(object({
+    protocol      = string
+    ports         = list(string)
+    source_ranges = list(string)
+  }))
+  default = {}
+}

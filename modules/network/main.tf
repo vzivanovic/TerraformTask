@@ -14,14 +14,16 @@ resource "google_compute_subnetwork" "subnet" {
   network       = google_compute_network.vpc_network.name
 }
 
-resource "google_compute_firewall" "default" {
-  name    = "allow-http-ssh"
+resource "google_compute_firewall" "firewall_rules" {
+  for_each = var.firewall_rules
+
+  name    = each.key
   network = google_compute_network.vpc_network.name
 
   allow {
-    protocol = "tcp"
-    ports    = ["80", "22"]
+    protocol = each.value.protocol
+    ports    = each.value.ports
   }
 
-  source_ranges = ["109.111.235.230/32"]
+  source_ranges = each.value.source_ranges
 }

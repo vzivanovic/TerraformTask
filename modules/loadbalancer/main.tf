@@ -1,8 +1,8 @@
 resource "google_compute_health_check" "default" {
-  name               = var.health_check_name
-  check_interval_sec = 10
-  timeout_sec        = 5
-  healthy_threshold  = 2
+  name                = var.health_check_name
+  check_interval_sec  = 10
+  timeout_sec         = 5
+  healthy_threshold   = 2
   unhealthy_threshold = 2
   http_health_check {
     port = 80
@@ -10,7 +10,7 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  name         = var.backend_service_name
+  name          = var.backend_service_name
   health_checks = [google_compute_health_check.default.self_link]
   backend {
     group = var.instance_group
